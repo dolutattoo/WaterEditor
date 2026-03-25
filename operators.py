@@ -8,6 +8,7 @@ from .element import (
     ValueProperty,
 )
 from .helper_funcs import create_quad, create_materials, quad_min_max, round_to_even
+from . import overlay
 
 
 class OT_Import_WaterXML(bpy.types.Operator, ImportHelper):
@@ -16,7 +17,7 @@ class OT_Import_WaterXML(bpy.types.Operator, ImportHelper):
 
     filter_glob: bpy.props.StringProperty(
         default='*.xml;',
-    )
+    ) # type: ignore
 
     def execute(self, context):
 
@@ -26,6 +27,7 @@ class OT_Import_WaterXML(bpy.types.Operator, ImportHelper):
         filepath = os.path.join(folderpath, (filename+extension))
 
         dat = WaterData.from_xml_file(filepath)
+        overlay._importing = True
 
         print("Starting WaterQuads generation")
         mat = create_materials("WaterQuad", (0, 0.18, 1, 1))
@@ -56,7 +58,7 @@ class OT_Import_WaterXML(bpy.types.Operator, ImportHelper):
             created_quad.waterProperties.water_a4 = quad.a4
             created_quad.waterProperties.water_no_stencil = quad.no_stencil
             count += 1
-        print(f"Imported {count} WaterQuads")
+        print(f"Imported {count - 1} WaterQuads")
 
         print("Starting CalmingQuads generation")
         mat = create_materials("CalmingQuad", (0, 0.66, 1, 1))
@@ -77,7 +79,7 @@ class OT_Import_WaterXML(bpy.types.Operator, ImportHelper):
             created_quad.gta_quadtype = 'calming'
             created_quad.waterProperties.water_fDampening = quad.fDampening
             count += 1
-        print(f"Imported {count} CalmingQuad")
+        print(f"Imported {count - 1} CalmingQuad")
 
         print("Starting WaveQuads generation")
         mat = create_materials("WaveQuad", (0, 1, 0.4, 1))
@@ -100,8 +102,9 @@ class OT_Import_WaterXML(bpy.types.Operator, ImportHelper):
             created_quad.waterProperties.water_xDirection = quad.x_direction
             created_quad.waterProperties.water_yDirection = quad.y_direction
             count += 1
-        print(f"Imported {count} WaveQuads")
+        print(f"Imported {count - 1} WaveQuads")
 
+        overlay._importing = False
         self.report({"INFO"}, "Successfully imported water.xml")
         return {'FINISHED'}
 
@@ -114,7 +117,7 @@ class OT_Export_WaterXML(bpy.types.Operator):
         name="Output directory",
         description="Select export output directory",
         subtype="DIR_PATH",
-    )
+    ) # type: ignore
 
     def invoke(self, context, event):
         context.window_manager.fileselect_add(self)

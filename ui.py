@@ -11,17 +11,15 @@ class WATEREDITOR_PT_VIEW_PANEL(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
+        
         row = layout.row()
-        row.operator("watereditor.open_filebrowser")
+        row.split(factor=0.5)
+        row.operator("watereditor.open_filebrowser", text="Import")
+        row.operator("watereditor.export_waterxml", text="Export")
+
         row = layout.row()
-        row.operator("watereditor.export_waterxml")
-        row = layout.row()
-        row.label(text="Liked the addon? Consider supporting me")
-        row = layout.row()
-        url_btn = row.operator('wm.url_open',
-                     text='Donate',
-                     icon='URL')
-        url_btn.url = 'https://ko-fi.com/ultrahacx'
+        layout.prop(context.scene, 'watereditor_show_wave_overlay',
+                    toggle=True, icon='FORCE_WIND')
 
 
 class WATEREDITOR_PT_OBJECT_PANEL(bpy.types.Panel):
@@ -43,6 +41,8 @@ class WATEREDITOR_PT_OBJECT_PANEL(bpy.types.Panel):
             layout.label(
                 text="No sollumz objects in scene selected.", icon="ERROR")
         else:
+            layout.prop(obj, 'gta_quadtype')
+            layout.separator()
             if obj.gta_quadtype == 'water':
                 layout = self.layout
                 layout.prop(obj.waterProperties, 'water_type')
